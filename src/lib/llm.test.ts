@@ -39,6 +39,11 @@ describe("chat", () => {
     expect(error.message).toMatch(/free model allowance/);
   });
 
+  it("treats a body that is not JSON as a retryable failure", async () => {
+    vi.stubGlobal("fetch", vi.fn(async () => new Response("OK", { status: 200, headers: { "content-type": "text/plain" } })));
+    await expect(chat(o, [], tools)).rejects.toMatchObject({ retryable: true, message: "The model returned a response that is not JSON." });
+  });
+
   it("retries server errors and network failures but not bad requests", async () => {
     respond(503, {});
     await expect(chat(o, [], tools)).rejects.toMatchObject({ retryable: true });

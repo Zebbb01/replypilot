@@ -95,7 +95,7 @@ export function Inbox({ view }: { view: "demo" | "live" }) {
                 type="button"
                 disabled={busy}
                 onClick={() => create({ scenario: s.id })}
-                className={`rounded-lg border border-line px-3 py-2.5 text-left hover:border-brand disabled:opacity-50 ${focusRing}`}
+                className={`flex flex-col justify-start rounded-lg border border-line px-3 py-2.5 text-left hover:border-brand disabled:opacity-50 ${focusRing}`}
               >
                 <span className="block text-sm font-medium">{s.title}</span>
                 <span className="mt-0.5 line-clamp-2 block text-xs text-muted">{s.body}</span>

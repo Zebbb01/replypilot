@@ -42,7 +42,9 @@ export async function chat(o: LlmOptions, messages: Message[], tools: Tool[]): P
     throw new LlmError("The model is rate limiting requests.", true, wait);
   }
   if (!res.ok) throw new LlmError(`The model returned ${res.status}.`, res.status >= 500);
-  const body = (await res.json()) as { choices?: { message?: AssistantMessage }[]; usage?: { prompt_tokens?: number; completion_tokens?: number } };
+  const body = (await res.json().catch(() => {
+    throw new LlmError("The model returned a response that is not JSON.", true);
+  })) as { choices?: { message?: AssistantMessage }[]; usage?: { prompt_tokens?: number; completion_tokens?: number } };
   const message = body.choices?.[0]?.message;
   if (!message) throw new LlmError("The model returned no message.", true);
   return { message, usage: { tokensIn: body.usage?.prompt_tokens ?? 0, tokensOut: body.usage?.completion_tokens ?? 0 } };

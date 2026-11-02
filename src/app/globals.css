@@ -1,0 +1,44 @@
+@import "tailwindcss";
+
+/* ReplyPilot tokens. One accent (blue); green, red and amber are reserved for
+   what a reviewer must act on: sent or passed, blocked, and needs a person. */
+@theme {
+  --color-canvas: #f4f6f9;
+  --color-surface: #ffffff;
+  --color-ink: #0f172a;
+  --color-muted: #475569;
+  --color-line: #d6dbe3;
+  --color-brand: #1d4fd8;
+  --color-brand-strong: #1a3fae;
+  --color-on-brand: #ffffff;
+  --color-pass: #15803d;
+  --color-fail: #b91c1c;
+  --color-warn: #a16207;
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-canvas: #0a0d13;
+    --color-surface: #121722;
+    --color-ink: #e2e8f0;
+    --color-muted: #94a3b8;
+    --color-line: #263042;
+    --color-brand: #93b4ff;
+    --color-brand-strong: #bcd0ff;
+    --color-on-brand: #0f172a;
+    --color-pass: #4ade80;
+    --color-fail: #f87171;
+    --color-warn: #fbbf24;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}

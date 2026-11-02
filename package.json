@@ -1,0 +1,44 @@
+{
+  "name": "replypilot",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "An AI support agent for an online store: it reads customer emails and Shopify events, looks up orders and store policies, and drafts a reply that a person approves before anything is sent.",
+  "engines": {
+    "node": ">=22.16"
+  },
+  "scripts": {
+    "dev": "next dev --port 3300",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "typecheck": "next typegen && tsc --noEmit",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "worker": "node --experimental-strip-types --disable-warning=ExperimentalWarning src/worker/run.ts",
+    "services": "node --experimental-strip-types --disable-warning=ExperimentalWarning scripts/dev-services.ts",
+    "eval": "node --experimental-strip-types --disable-warning=ExperimentalWarning scripts/eval.ts"
+  },
+  "dependencies": {
+    "next": "16.4.3",
+    "nodemailer": "^10.3.1",
+    "pg": "^8.23.1",
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.64.1",
+    "@tailwindcss/turbopack": "^4",
+    "@types/node": "^22.20.5",
+    "@types/nodemailer": "^8.0.2",
+    "@types/pg": "^8.23.1",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "embedded-postgres": "17.11.0-beta.19",
+    "eslint": "^9",
+    "eslint-config-next": "16.4.3",
+    "tailwindcss": "^4",
+    "typescript": "^5",
+    "vitest": "^5.0.5"
+  }
+}

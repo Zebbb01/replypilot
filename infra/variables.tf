@@ -60,9 +60,10 @@ variable "shopify_shop" {
 }
 
 variable "shopify_client_id" {
-  description = "Client ID of the Dev Dashboard app installed on the store."
+  description = "Client ID of the Dev Dashboard app installed on the store. Not a secret, but stored as one with the others."
   type        = string
   default     = ""
+  sensitive   = true
 }
 
 variable "shopify_client_secret" {

@@ -4,7 +4,8 @@ FROM node:22-alpine AS build
 WORKDIR /app
 ENV NEXT_TELEMETRY_DISABLED=1
 COPY package.json package-lock.json ./
-RUN npm ci
+# No install scripts: only the embedded-postgres binaries (test-only) and fsevents (macOS) have them.
+RUN npm ci --ignore-scripts
 COPY . .
 RUN npm run build && find src -name "*.test.ts" -delete
 

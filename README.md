@@ -29,8 +29,8 @@ The store is **Kettle & Pine**, a fictional coffee-gear shop; its customers and 
   step that failed instead of paying for the same calls again, and a stored send is never sent twice.
 - **Retries** with backoff (5, 10, 20 and 40 seconds, or the model's `Retry-After`), then the ticket fails with
   the reason and can be run again from where it stopped. Errors a retry cannot fix fail at once.
-- **Cost per ticket.** Tokens for every model call, priced at the model's list price. On GitHub Models' free
-  tier the actual cost is zero; the figure shows what a paid API would charge.
+- **Cost per ticket.** Tokens for every model call (thinking included), priced at the model's paid list price.
+  On the Gemini API's free tier the actual cost is zero; the figure shows what a paid key would charge.
 - **Evals.** Twelve sample tickets with expectations graded in code (tools called, category, escalation,
   policies cited, facts mentioned, facts that must not leak).
 
@@ -43,7 +43,7 @@ flowchart LR
   R[Reviewer] <-->|review, edit, approve| W
   W -->|ticket + job| P[(PostgreSQL<br/>tickets, jobs, steps, audit log)]
   P <--> K[Worker<br/>same Container App]
-  K -->|tool calls| M[GitHub Models<br/>gpt-4.1-mini]
+  K -->|tool calls| M[Gemini API<br/>gemini-3.5-flash-lite]
   K -->|orders| A[Shopify Admin GraphQL]
   K -->|after approval| E[SMTP, or the outbox]
 ```
@@ -80,11 +80,12 @@ grades every draft in code, with no model judging another model. For the attack,
 counts as caught.
 
 ```bash
-LLM_API_KEY=<GitHub token with models:read> npm run eval   # writes evals/latest.json
+LLM_API_KEY=<Gemini API key> npm run eval   # writes evals/latest.json
 ```
 
-**No score yet.** The build machine could not reach GitHub Models, so the eval has not run against a real
-model. The score and the measured cost per ticket go here once it has.
+**No score yet.** ReplyPilot first targeted GitHub Models, which GitHub retired on 2026-07-30, so the first eval
+run never reached a model. It now runs on the Gemini API; the score and the measured cost per ticket go here
+once the eval has run against it.
 
 ## Staying free
 
@@ -93,7 +94,7 @@ model. The score and the measured cost per ticket go here once it has.
 | Container Apps (consumption) | 180,000 vCPU-seconds, 360,000 GiB-seconds and 2 million requests a month | Scales to zero; one replica of 0.5 vCPU and 1 GiB (web + worker) is about 100 awake hours a month |
 | Azure Database for PostgreSQL Flexible Server | 750 hours of B1ms, 32 GB storage and 32 GB backups a month, for 12 months on a free account | One B1ms server, 32 GB, no storage auto-grow, no geo-redundant backups |
 | Log Analytics | 5 GB of ingestion a month | Daily cap of 0.1 GB |
-| GitHub Models | Free, rate-limited (about 150 requests a day for gpt-4.1-mini) | At most 40 drafts a day; demo limits per browser and per address |
+| Gemini API | Free tier, no billing; per-project rate limits shown in AI Studio | At most 40 drafts a day; demo limits per browser and per address |
 | GitHub Actions and Container Registry | Free for public repositories | |
 | Shopify dev store, Postmark developer plan, Gmail SMTP | Free | Only for the optional live inbox |
 
@@ -102,7 +103,7 @@ model. The score and the measured cost per ticket go here once it has.
 | Part | Choice |
 | --- | --- |
 | Web app | Next.js 16 (App Router, route handlers, proxy), React 19, TypeScript, Tailwind CSS 4 |
-| Agent | OpenAI-compatible chat completions with tool calling (`fetch`, no SDK); GitHub Models by default |
+| Agent | OpenAI-compatible chat completions with tool calling (`fetch`, no SDK); the Gemini API by default |
 | Worker | Plain Node.js running the same TypeScript files (native type stripping), same container image |
 | Data | PostgreSQL with `pg`: job queue with `SKIP LOCKED`, durable steps, append-only audit log enforced by a trigger |
 | Integrations | Shopify Admin GraphQL API (client credentials grant), HMAC-verified Shopify webhooks, Postmark inbound email, SMTP via Nodemailer |
@@ -129,7 +130,7 @@ that runs `npm run services`.
 ## Tests
 
 ```bash
-npm test           # 68 unit tests: agent loop, checks, job queue, durable steps, workflow, Shopify, webhooks, evals grader
+npm test           # 70 unit tests: agent loop, checks, job queue, durable steps, workflow, Shopify, webhooks, evals grader
 npm run test:e2e   # 8 Playwright tests: starts PostgreSQL, the mock model, the worker and the app
 ```
 
@@ -150,7 +151,9 @@ redelivery, basic-auth inbound email and operator sign-in for the live inbox.
   outbox. The live inbox, which emails real people, needs the operator key.
 - **The audit log cannot be edited**: a trigger rejects any `UPDATE` on it.
 - **Privacy.** Raw IP addresses are never stored (only a salted hash for the daily limits), and demo tickets
-  are deleted after 7 days.
+  are deleted after 7 days. Google may use free-tier Gemini prompts to improve its products, so the demo uses
+  made-up customers and says so; a live inbox with real customers should use a paid key, whose prompts are not
+  used that way.
 
 ## Limits and next steps
 

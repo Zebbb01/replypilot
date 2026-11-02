@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { chat, costUsd, LlmError, type Tool } from "./llm.ts";
 
-const o = { endpoint: "https://models.example/inference/", key: "k", model: "openai/gpt-4.1-mini" };
+const o = { endpoint: "https://models.example/v1beta/openai/", key: "k", model: "gemini-3.5-flash-lite" };
 const tools: Tool[] = [{ type: "function", function: { name: "recent_orders", description: "d", parameters: { type: "object", properties: {} } } }];
 
 function respond(status: number, body: unknown, headers: Record<string, string> = {}) {
@@ -21,9 +21,15 @@ describe("chat", () => {
 
     expect(result).toEqual({ message, usage: { tokensIn: 120, tokensOut: 15 } });
     const [url, init] = fetch.mock.calls[0] as unknown as [string, RequestInit];
-    expect(url).toBe("https://models.example/inference/chat/completions");
+    expect(url).toBe("https://models.example/v1beta/openai/chat/completions");
     expect(init.headers).toMatchObject({ Authorization: "Bearer k" });
-    expect(JSON.parse(String(init.body))).toMatchObject({ model: o.model, tools, tool_choice: "required", messages: [{ role: "user", content: "hi" }] });
+    expect(JSON.parse(String(init.body))).toMatchObject({ model: o.model, tools, tool_choice: "auto", messages: [{ role: "user", content: "hi" }] });
+  });
+
+  it("counts thinking tokens, which only the total includes, as output", async () => {
+    const message = { role: "assistant", content: "Hello" };
+    respond(200, { choices: [{ message }], usage: { prompt_tokens: 100, completion_tokens: 10, total_tokens: 150 } });
+    expect((await chat(o, [], tools)).usage).toEqual({ tokensIn: 100, tokensOut: 50 });
   });
 
   it("marks rate limits as retryable and honors Retry-After", async () => {
@@ -56,7 +62,7 @@ describe("chat", () => {
 
 describe("costUsd", () => {
   it("prices tokens at the model's list price per million", () => {
-    expect(costUsd("openai/gpt-4.1-mini", { tokensIn: 1_000_000, tokensOut: 500_000 })).toBeCloseTo(1.2);
+    expect(costUsd("gemini-3.5-flash-lite", { tokensIn: 1_000_000, tokensOut: 500_000 })).toBeCloseTo(1.55);
     expect(costUsd("unknown-model", { tokensIn: 1000, tokensOut: 1000 })).toBe(0);
   });
 });

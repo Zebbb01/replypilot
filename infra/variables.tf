@@ -28,7 +28,7 @@ variable "alert_email" {
 }
 
 variable "llm_api_key" {
-  description = "Key for the model: a GitHub token with models:read for GitHub Models' free tier."
+  description = "Key for the model: a Gemini API key from Google AI Studio, on a project without billing so it stays on the free tier."
   type        = string
   sensitive   = true
 }
@@ -36,17 +36,17 @@ variable "llm_api_key" {
 variable "llm_endpoint" {
   description = "OpenAI-compatible endpoint with tool calling."
   type        = string
-  default     = "https://models.github.ai/inference"
+  default     = "https://generativelanguage.googleapis.com/v1beta/openai"
 }
 
 variable "llm_model" {
   description = "Model name at that endpoint."
   type        = string
-  default     = "openai/gpt-4.1-mini"
+  default     = "gemini-3.5-flash-lite"
 }
 
 variable "daily_draft_cap" {
-  description = "Drafts per day across the whole app. GitHub Models' free tier allows about 150 requests a day, and a draft takes about three."
+  description = "Drafts per day across the whole app. A draft takes about three model calls; the free tier's daily request limit per project is shown in AI Studio."
   type        = number
   default     = 40
 }

@@ -1,7 +1,7 @@
 // Runs the agent on every sample ticket in samples/scenarios.json against a real
 // model, grades each draft in code (no model judges another), and writes
-// evals/latest.json. With a GitHub token, on GitHub Models' free tier:
-//   LLM_API_KEY=$(gh auth token) npm run eval
+// evals/latest.json. With a Gemini API key from Google AI Studio (free tier):
+//   LLM_API_KEY=... npm run eval
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { draftReply, memorySteps } from "../src/lib/agent.ts";
 import { chat, costUsd, LlmError, type Message, type Tool } from "../src/lib/llm.ts";
@@ -10,11 +10,11 @@ import { llmOptions, sampleOrders, STORE } from "../src/lib/runtime.ts";
 import { grade, SCENARIOS } from "../src/lib/scenarios.ts";
 
 const o = llmOptions();
-if (!o.key || o.model === "mock") throw new Error("Set LLM_API_KEY (and LLM_MODEL/LLM_ENDPOINT for a model other than GitHub Models' openai/gpt-4.1-mini).");
+if (!o.key || o.model === "mock") throw new Error(`Set LLM_API_KEY to a Gemini API key (or set LLM_ENDPOINT and LLM_MODEL for another provider than ${o.model}).`);
 const policies = parsePolicies(await readFile("policies/store-policies.md", "utf8"));
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-// The free tier allows about 15 requests a minute, so rate limits are waited out.
+// The free tier allows only a few requests a minute, so rate limits are waited out.
 async function llm(messages: Message[], tools: Tool[]) {
   for (let attempt = 1; ; attempt++) {
     try {

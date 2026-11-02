@@ -28,8 +28,8 @@ export const ordersFor = (workspace: string) => (workspace === LIVE ? liveOrders
 export function llmOptions() {
   const env = process.env;
   return {
-    endpoint: env.LLM_ENDPOINT ?? "https://models.github.ai/inference",
+    endpoint: env.LLM_ENDPOINT ?? "https://generativelanguage.googleapis.com/v1beta/openai",
     key: env.LLM_API_KEY ?? "",
-    model: env.LLM_MODEL ?? "openai/gpt-4.1-mini",
+    model: env.LLM_MODEL ?? "gemini-3.5-flash-lite",
   };
 }

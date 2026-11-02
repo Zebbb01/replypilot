@@ -98,6 +98,13 @@ describe("draftReply", () => {
     expect(draft.evidence.verifiedOrders).toEqual(["#1002"]);
   });
 
+  it("asks again when the model answers in plain text instead of calling a tool", async () => {
+    const { llm, seen } = script({ role: "assistant", content: "Your grinder is on its way!" }, say(submit()));
+    const draft = await draftReply(ticket, deps(llm));
+    expect(draft.turns).toBe(2);
+    expect(seen[1].at(-1)).toEqual({ role: "user", content: "Finish by calling submit_draft." });
+  });
+
   it("sends an invalid draft back to the model to fix", async () => {
     const { llm, seen } = script(say(submit({ reply: "" })), say(submit()));
     const draft = await draftReply(ticket, deps(llm));

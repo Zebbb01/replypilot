@@ -42,7 +42,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <footer className="border-t border-line">
           <p className="mx-auto max-w-6xl px-4 py-5 text-xs leading-relaxed text-muted sm:px-6">
             A free demo on Azure&apos;s free tiers. Kettle &amp; Pine is a fictional store, and its customers and orders
-            are made up. Demo replies go to an outbox and are never emailed. Demo tickets are deleted after 7 days.
+            are made up. Messages go to the Gemini API&apos;s free tier, which Google may use to improve its products,
+            so do not enter real personal details. Demo replies go to an outbox and are never emailed. Demo tickets are
+            deleted after 7 days.
           </p>
         </footer>
       </body>

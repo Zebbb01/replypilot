@@ -74,7 +74,7 @@ describe("backoffMs", () => {
 describe("dbSteps", () => {
   it("runs a step once and replays its stored result, with token cost", async () => {
     const t = await ticket();
-    const step = dbSteps(db(), t, 1, "openai/gpt-4.1-mini");
+    const step = dbSteps(db(), t, 1, "gemini-3.5-flash-lite");
     const work = vi.fn(async () => ({ answer: 42, usage: { tokensIn: 1000, tokensOut: 100 } }));
 
     expect(await step("llm-1", work, (r) => r.usage)).toEqual({ answer: 42, usage: { tokensIn: 1000, tokensOut: 100 } });
@@ -82,7 +82,7 @@ describe("dbSteps", () => {
     expect(work).toHaveBeenCalledTimes(1);
 
     const { rows } = await db().query(`select tokens_in, tokens_out, cost_usd from steps where ticket_id = $1`, [t]);
-    expect(rows).toEqual([{ tokens_in: 1000, tokens_out: 100, cost_usd: expect.closeTo(0.00056, 8) }]);
+    expect(rows).toEqual([{ tokens_in: 1000, tokens_out: 100, cost_usd: expect.closeTo(0.00055, 8) }]);
   });
 
   it("does not store a failed step, so the next run tries it again", async () => {

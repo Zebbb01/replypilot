@@ -313,7 +313,7 @@ export function TicketView() {
                 {usd(view.cost.usd)}
               </dd>
             </dl>
-            <p className="mt-2 text-xs text-muted">Actual cost is $0: the model runs on GitHub Models&apos; free tier.</p>
+            <p className="mt-2 text-xs text-muted">Actual cost is $0: the model runs on the Gemini API&apos;s free tier.</p>
           </section>
 
           <section aria-labelledby="trace" className={card}>

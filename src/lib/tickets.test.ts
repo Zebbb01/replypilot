@@ -49,7 +49,7 @@ function setup(fail: Error[] = []) {
     searchPolicies: (q) => searchPolicies(policies, q),
     send,
     store: "Kettle & Pine",
-    model: "openai/gpt-4.1-mini",
+    model: "gemini-3.5-flash-lite",
     dailyDraftCap: 100,
   };
   return { deps, llm, send, seen };
@@ -98,7 +98,7 @@ describe("runNextJob", () => {
     expect(view.ticket.status).toBe("needs_approval");
     expect(view.ticket.draft).toMatchObject({ reply, evidence: { verifiedOrders: ["#1002"] } });
     expect(view.cost).toMatchObject({ llmCalls: 2, tokensIn: 2000, tokensOut: 100 });
-    expect(view.cost.usd).toBeCloseTo(0.00096, 8);
+    expect(view.cost.usd).toBeCloseTo(0.00085, 8);
     expect(view.steps.map((s) => s.name)).toEqual(["llm-1", "tool-1-a", "llm-2"]);
     expect(await types(id)).toEqual(["ticket.received", "draft.started", "draft.ready"]);
   });

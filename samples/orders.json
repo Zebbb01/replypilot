@@ -1,0 +1,111 @@
+[
+  {
+    "id": "5550001001",
+    "number": "#1001",
+    "email": "maria.santos@example.com",
+    "customerName": "Maria Santos",
+    "createdAt": "2026-10-20T03:12:00Z",
+    "cancelledAt": null,
+    "financialStatus": "PAID",
+    "fulfillmentStatus": "FULFILLED",
+    "total": "89.00",
+    "shipping": "0.00",
+    "currency": "USD",
+    "items": [{ "title": "Gooseneck Pour-Over Kettle", "quantity": 1, "price": "89.00" }],
+    "shipments": [
+      { "status": "DELIVERED", "carrier": "UPS", "trackingNumber": "1Z999AA10000001001", "trackingUrl": "https://www.ups.com/track?tracknum=1Z999AA10000001001" }
+    ],
+    "shipTo": "Portland, US"
+  },
+  {
+    "id": "5550001002",
+    "number": "#1002",
+    "email": "alex.kim@example.com",
+    "customerName": "Alex Kim",
+    "createdAt": "2026-10-27T09:40:00Z",
+    "cancelledAt": null,
+    "financialStatus": "PAID",
+    "fulfillmentStatus": "FULFILLED",
+    "total": "149.00",
+    "shipping": "0.00",
+    "currency": "USD",
+    "items": [{ "title": "Conical Burr Grinder", "quantity": 1, "price": "149.00" }],
+    "shipments": [
+      { "status": "IN_TRANSIT", "carrier": "USPS", "trackingNumber": "9400100000000000001002", "trackingUrl": "https://tools.usps.com/go/TrackConfirmAction?tLabels=9400100000000000001002" }
+    ],
+    "shipTo": "Austin, US"
+  },
+  {
+    "id": "5550001003",
+    "number": "#1003",
+    "email": "sam.patel@example.com",
+    "customerName": "Sam Patel",
+    "createdAt": "2026-10-18T14:05:00Z",
+    "cancelledAt": null,
+    "financialStatus": "PAID",
+    "fulfillmentStatus": "FULFILLED",
+    "total": "54.00",
+    "shipping": "6.00",
+    "currency": "USD",
+    "items": [{ "title": "Stoneware Mug (Set of 2)", "quantity": 2, "price": "24.00" }],
+    "shipments": [
+      { "status": "DELIVERED", "carrier": "USPS", "trackingNumber": "9400100000000000001003", "trackingUrl": "https://tools.usps.com/go/TrackConfirmAction?tLabels=9400100000000000001003" }
+    ],
+    "shipTo": "Chicago, US"
+  },
+  {
+    "id": "5550001004",
+    "number": "#1004",
+    "email": "jordan.lee@example.com",
+    "customerName": "Jordan Lee",
+    "createdAt": "2026-10-31T22:18:00Z",
+    "cancelledAt": null,
+    "financialStatus": "PAID",
+    "fulfillmentStatus": "UNFULFILLED",
+    "total": "46.00",
+    "shipping": "6.00",
+    "currency": "USD",
+    "items": [
+      { "title": "Glass Carafe", "quantity": 1, "price": "32.00" },
+      { "title": "Paper Filters (100)", "quantity": 1, "price": "8.00" }
+    ],
+    "shipments": [],
+    "shipTo": "Denver, US"
+  },
+  {
+    "id": "5550001005",
+    "number": "#1005",
+    "email": "alex.kim@example.com",
+    "customerName": "Alex Kim",
+    "createdAt": "2026-09-12T11:00:00Z",
+    "cancelledAt": null,
+    "financialStatus": "PAID",
+    "fulfillmentStatus": "FULFILLED",
+    "total": "30.00",
+    "shipping": "6.00",
+    "currency": "USD",
+    "items": [{ "title": "Paper Filters (100)", "quantity": 3, "price": "8.00" }],
+    "shipments": [
+      { "status": "DELIVERED", "carrier": "USPS", "trackingNumber": "9400100000000000001005", "trackingUrl": "https://tools.usps.com/go/TrackConfirmAction?tLabels=9400100000000000001005" }
+    ],
+    "shipTo": "Austin, US"
+  },
+  {
+    "id": "5550001006",
+    "number": "#1006",
+    "email": "priya.nair@example.com",
+    "customerName": "Priya Nair",
+    "createdAt": "2026-10-22T06:30:00Z",
+    "cancelledAt": null,
+    "financialStatus": "PAID",
+    "fulfillmentStatus": "FULFILLED",
+    "total": "45.00",
+    "shipping": "6.00",
+    "currency": "USD",
+    "items": [{ "title": "Espresso Tamper", "quantity": 1, "price": "39.00" }],
+    "shipments": [
+      { "status": "DELAYED", "carrier": "FedEx", "trackingNumber": "770000001006", "trackingUrl": "https://www.fedex.com/fedextrack/?trknbr=770000001006" }
+    ],
+    "shipTo": "Seattle, US"
+  }
+]

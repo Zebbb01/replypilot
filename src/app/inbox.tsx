@@ -126,7 +126,8 @@ export function Inbox({ view }: { view: "demo" | "live" }) {
                 <a className="underline" href="https://github.com/Zebbb01/replypilot/blob/main/samples/orders.json">
                   samples/orders.json
                 </a>
-                ; write from another address to see the agent refuse to share order details.
+                ; write from another address to see the agent refuse to share order details. Use made-up details only:
+                the free model tier may use messages to improve Google&apos;s products.
               </p>
               <div className="sm:col-span-2">
                 <button type="submit" disabled={busy} className={buttonClass.primary}>

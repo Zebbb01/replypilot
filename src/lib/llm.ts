@@ -1,5 +1,5 @@
 // One chat-completions call with tools. Any OpenAI-compatible endpoint works; the
-// default is GitHub Models' free tier. Errors say whether a retry can help.
+// default is the Gemini API's free tier. Errors say whether a retry can help.
 export type ToolCall = { id: string; type: "function"; function: { name: string; arguments: string } };
 export type AssistantMessage = { role: "assistant"; content: string | null; tool_calls?: ToolCall[] };
 export type Message =
@@ -30,7 +30,9 @@ export async function chat(o: LlmOptions, messages: Message[], tools: Tool[]): P
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${o.key}` },
       signal: AbortSignal.timeout(60_000),
-      body: JSON.stringify({ model: o.model, temperature: 0.2, messages, tools, tool_choice: "required" }),
+      // "auto", not "required": every OpenAI-compatible API accepts it, and the agent
+      // loop asks again when the model answers without a tool call.
+      body: JSON.stringify({ model: o.model, temperature: 0.2, messages, tools, tool_choice: "auto" }),
     });
   } catch (e) {
     throw new LlmError(`The model could not be reached (${e instanceof Error ? e.message : e}).`, true);
@@ -44,20 +46,22 @@ export async function chat(o: LlmOptions, messages: Message[], tools: Tool[]): P
   if (!res.ok) throw new LlmError(`The model returned ${res.status}.`, res.status >= 500);
   const body = (await res.json().catch(() => {
     throw new LlmError("The model returned a response that is not JSON.", true);
-  })) as { choices?: { message?: AssistantMessage }[]; usage?: { prompt_tokens?: number; completion_tokens?: number } };
+  })) as { choices?: { message?: AssistantMessage }[]; usage?: { prompt_tokens?: number; completion_tokens?: number; total_tokens?: number } };
   const message = body.choices?.[0]?.message;
   if (!message) throw new LlmError("The model returned no message.", true);
-  return { message, usage: { tokensIn: body.usage?.prompt_tokens ?? 0, tokensOut: body.usage?.completion_tokens ?? 0 } };
+  // Gemini bills thinking as output but leaves it out of completion_tokens; the total has it.
+  const u = body.usage ?? {};
+  const tokensIn = u.prompt_tokens ?? 0;
+  return { message, usage: { tokensIn, tokensOut: Math.max(u.completion_tokens ?? 0, (u.total_tokens ?? 0) - tokensIn) } };
 }
 
-// List prices in USD per million tokens, for the cost-per-ticket figures. On GitHub
-// Models' free tier the actual cost is zero; these show what a paid API would charge.
+// Paid-tier list prices in USD per million tokens (Gemini API, November 2026), for
+// the cost-per-ticket figures. On the free tier the actual cost is zero; these show
+// what the same tickets would cost on a paid key.
 const PRICES: Record<string, { in: number; out: number }> = {
-  "openai/gpt-4.1-mini": { in: 0.4, out: 1.6 },
-  "openai/gpt-4.1-nano": { in: 0.1, out: 0.4 },
-  "openai/gpt-4.1": { in: 2, out: 8 },
-  "openai/gpt-4o-mini": { in: 0.15, out: 0.6 },
-  "gemini-2.5-flash": { in: 0.3, out: 2.5 },
+  "gemini-3.5-flash-lite": { in: 0.3, out: 2.5 },
+  "gemini-3.1-flash-lite": { in: 0.25, out: 1.5 },
+  "gemini-3.8-flash": { in: 0.75, out: 3.75 },
   "gemini-2.5-flash-lite": { in: 0.1, out: 0.4 },
 };
 

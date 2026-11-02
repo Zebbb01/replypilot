@@ -46,9 +46,12 @@ takes 5 to 10 minutes to create.
 
 ## 2. Get a model key
 
-Create a fine-grained personal access token at GitHub → **Settings** → **Developer settings** → **Personal
-access tokens**, with **Account permissions** → **Models** → **Read-only**. GitHub Models' free tier needs
-nothing else. Keep the paid-usage setting for GitHub Models off, so nothing beyond the free tier can be billed.
+Create a Gemini API key at [Google AI Studio](https://aistudio.google.com/apikey). It needs no card. Keep
+billing off for the key's Google Cloud project: without billing, the key stays on the free tier and nothing
+can be charged. Your project's free-tier limits are at [aistudio.google.com/rate-limit](https://aistudio.google.com/rate-limit).
+
+Google may use free-tier prompts to improve its products. That is fine for the demo's made-up customers; see
+step 6 before putting real customer emails through it.
 
 ## 3. Create the Azure resources
 
@@ -61,7 +64,7 @@ cd replypilot/infra
 terraform init
 terraform apply \
   -var 'github_oidc_subject_prefix=repo:Zebbb01@179115543/replypilot@123456789' \
-  -var 'llm_api_key=github_pat_...' \
+  -var 'llm_api_key=AIza...' \
   -var 'alert_email=you@example.com'
 ```
 
@@ -93,13 +96,17 @@ Open the URL and send one of the sample emails. The first request after a quiet 
 To score the agent on the free model and fill in the README's eval section:
 
 ```bash
-LLM_API_KEY=github_pat_... npm run eval
+LLM_API_KEY=AIza... npm run eval
 ```
 
 ## 6. Optional: the live inbox
 
 Without these settings the live inbox still works with the sample orders, and approved replies stay in the
 outbox. Each part below is free. Pass the values to `terraform apply` with `-var`, as in step 3.
+
+Real customer emails would go to the model too. On the free tier Google may use them to improve its products,
+so keep the free setup to your own test emails; real customers need a paid Gemini key (billed, so not part of
+this free deployment).
 
 **Shopify dev store** (`shopify_shop`, `shopify_client_id`, `shopify_client_secret`)
 

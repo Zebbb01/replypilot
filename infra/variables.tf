@@ -4,6 +4,12 @@ variable "location" {
   default     = "southeastasia"
 }
 
+variable "container_app_environment_id" {
+  description = "ID of an existing Container Apps environment in the same region to join. A Free Trial subscription allows only one environment per region. Empty creates a new environment with its own Log Analytics workspace."
+  type        = string
+  default     = ""
+}
+
 variable "name_prefix" {
   description = "Prefix for resource names; a random suffix keeps global names unique."
   type        = string

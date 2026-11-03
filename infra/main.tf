@@ -1,6 +1,9 @@
 # ReplyPilot on Azure, using only free tiers and free monthly grants: Container Apps
 # (consumption), Azure Database for PostgreSQL Flexible Server (B1ms, free for 12
 # months on a free account), Log Analytics (daily cap under 5 GB/month).
+#
+# A Free Trial subscription allows one Container Apps environment per region, so a
+# second app in the same region joins an existing one (container_app_environment_id).
 
 terraform {
   required_version = ">= 1.6"
@@ -42,6 +45,9 @@ locals {
   name = "${var.name_prefix}-${random_string.suffix.result}"
   tags = { app = "replypilot", cost = "free-tier" }
 
+  own_environment = var.container_app_environment_id == ""
+  environment_id  = local.own_environment ? azurerm_container_app_environment.main[0].id : var.container_app_environment_id
+
   database_url = "postgres://replypilot:${random_password.db.result}@${azurerm_postgresql_flexible_server.main.fqdn}:5432/${azurerm_postgresql_flexible_server_database.app.name}?sslmode=verify-full"
 
   # Shared by the web app and the worker beside it.
@@ -78,6 +84,7 @@ resource "azurerm_resource_group" "main" {
 }
 
 resource "azurerm_log_analytics_workspace" "main" {
+  count               = local.own_environment ? 1 : 0
   name                = "log-${local.name}"
   location            = azurerm_resource_group.main.location
   resource_group_name = azurerm_resource_group.main.name
@@ -127,10 +134,11 @@ resource "azurerm_postgresql_flexible_server_database" "app" {
 }
 
 resource "azurerm_container_app_environment" "main" {
+  count                      = local.own_environment ? 1 : 0
   name                       = "cae-${local.name}"
   location                   = azurerm_resource_group.main.location
   resource_group_name        = azurerm_resource_group.main.name
-  log_analytics_workspace_id = azurerm_log_analytics_workspace.main.id
+  log_analytics_workspace_id = azurerm_log_analytics_workspace.main[0].id
   logs_destination           = "log-analytics"
   tags                       = local.tags
 
@@ -146,7 +154,7 @@ resource "azurerm_container_app_environment" "main" {
 # container in the same replica, so it is awake exactly when the app is.
 resource "azurerm_container_app" "web" {
   name                         = "ca-${local.name}"
-  container_app_environment_id = azurerm_container_app_environment.main.id
+  container_app_environment_id = local.environment_id
   resource_group_name          = azurerm_resource_group.main.name
   revision_mode                = "Single"
   workload_profile_name        = "Consumption"
@@ -246,6 +254,15 @@ resource "azurerm_federated_identity_credential" "github_main" {
 
 resource "azurerm_role_assignment" "deploy" {
   scope                = azurerm_resource_group.main.id
+  role_definition_name = "Contributor"
+  principal_id         = azurerm_user_assigned_identity.deploy.principal_id
+}
+
+# Rolling out a new revision checks the right to join the environment, which lives
+# in another resource group when it is shared.
+resource "azurerm_role_assignment" "deploy_environment" {
+  count                = local.own_environment ? 0 : 1
+  scope                = var.container_app_environment_id
   role_definition_name = "Contributor"
   principal_id         = azurerm_user_assigned_identity.deploy.principal_id
 }

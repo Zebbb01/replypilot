@@ -71,6 +71,11 @@ terraform apply \
 If Azure refuses the PostgreSQL server in Southeast Asia (`LocationIsOfferRestricted`), add
 `-var location=eastasia` (or another region) and apply again.
 
+A Free Trial subscription allows one Container Apps environment per region. If another app (such as
+LedgerLens) already has one in the region, the apply stops with `MaxNumberOfRegionalEnvironmentsInSubExceeded`;
+join that environment instead with
+`-var container_app_environment_id=$(az containerapp env list --query "[0].id" -o tsv)` and apply again.
+
 Keep the Terraform state (`terraform.tfstate`): it is how you update or remove the resources later.
 
 ## 4. Connect GitHub Actions

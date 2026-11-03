@@ -5,16 +5,17 @@ import { expect, test, type Page } from "@playwright/test";
 test.skip(!process.env.SCREENSHOTS, "Set SCREENSHOTS=1 to regenerate screenshots.");
 // caret: "initial" stops Playwright from styling inputs, which React would report
 // as a hydration mismatch.
-test.use({ viewport: { width: 1440, height: 1000 }, deviceScaleFactor: 2 });
+test.use({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 2 });
 
 async function sample(page: Page, title: string) {
   await page.goto("/");
-  await page.getByRole("button", { name: new RegExp(`^${title}`) }).click();
+  await page.getByRole("complementary", { name: "Demo tickets" }).getByRole("button", { name: "New email" }).click();
+  await page.getByRole("dialog", { name: "New test email" }).getByRole("button", { name: title }).click();
   await expect(page.getByTestId("ticket-status")).toHaveText("Needs approval", { timeout: 60_000 });
   return page.url();
 }
 
-const shot = (page: Page, name: string) => page.screenshot({ path: `docs/screenshots/${name}.png`, caret: "initial", fullPage: true });
+const shot = (page: Page, name: string) => page.screenshot({ path: `docs/screenshots/${name}.png`, caret: "initial" });
 
 for (const scheme of ["light", "dark"] as const) {
   test(`screenshots (${scheme})`, async ({ page }) => {
@@ -24,6 +25,7 @@ for (const scheme of ["light", "dark"] as const) {
     await sample(page, "Chargeback threat");
     await sample(page, "Someone else's order");
     const review = await sample(page, "Where is my order?");
+    await page.mouse.move(0, 0);
     await shot(page, `review${suffix}`);
 
     const reply = page.getByRole("textbox", { name: "Reply" });
@@ -34,10 +36,23 @@ for (const scheme of ["light", "dark"] as const) {
     await page.goto(review);
     await page.getByRole("button", { name: "Approve and send" }).click();
     await expect(page.getByTestId("ticket-status")).toHaveText("Sent");
+    await page.getByRole("tab", { name: "Activity" }).click();
+    await page.waitForTimeout(3800); // let the toast fade
     await shot(page, `sent${suffix}`);
 
     await page.goto("/");
-    await expect(page.getByRole("row")).toHaveCount(4);
+    await page.getByRole("complementary", { name: "Demo tickets" }).getByRole("button", { name: "New email" }).click();
+    await page.waitForTimeout(400); // let the dialog finish opening
     await shot(page, `home${suffix}`);
   });
 }
+
+test("screenshots (phone)", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const url = await sample(page, "Arrived damaged");
+  await shot(page, "phone-ticket");
+  await page.goto("/");
+  await expect(page.getByRole("complementary", { name: "Demo tickets" }).getByRole("link")).toHaveCount(1);
+  await shot(page, "phone-inbox");
+  expect(url).toContain("/tickets/");
+});

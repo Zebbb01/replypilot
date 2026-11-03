@@ -1,6 +1,6 @@
 {
   "name": "replypilot",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "type": "module",
   "description": "An AI support agent for an online store: it reads customer emails and Shopify events, looks up orders and store policies, and drafts a reply that a person approves before anything is sent.",

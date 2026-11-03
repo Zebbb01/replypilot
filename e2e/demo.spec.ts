@@ -1,15 +1,27 @@
 import { expect, test, type Page } from "@playwright/test";
 
-async function sample(page: Page, title: string) {
+const escape = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const list = (page: Page) => page.getByRole("complementary", { name: "Demo tickets" });
+
+async function newEmail(page: Page) {
   await page.goto("/");
-  await page.getByRole("button", { name: new RegExp(`^${title}`) }).click();
+  await list(page).getByRole("button", { name: "New email" }).click();
+  return page.getByRole("dialog", { name: "New test email" });
+}
+
+async function sample(page: Page, title: string) {
+  const dialog = await newEmail(page);
+  await dialog.getByRole("button", { name: new RegExp(`^${escape(title)}`) }).click();
   await expect(page).toHaveURL(/\/tickets\/[\w-]+$/);
   await expect(page.getByTestId("ticket-status")).toHaveText("Needs approval", { timeout: 60_000 });
 }
 
 const reply = (page: Page) => page.getByRole("textbox", { name: "Reply" });
 const check = (page: Page, title: string) => page.getByRole("list", { name: "Checks" }).getByRole("listitem").filter({ hasText: title });
-const audit = (page: Page) => page.getByTestId("audit-log");
+async function activity(page: Page) {
+  await page.getByRole("tab", { name: "Activity" }).click();
+  return page.getByTestId("audit-log");
+}
 
 test("a sample email is drafted from the order, edited, approved and sent to the outbox", async ({ page }) => {
   await sample(page, "Where is my order?");
@@ -18,18 +30,19 @@ test("a sample email is drafted from the order, edited, approved and sent to the
   await expect(check(page, "Orders verified")).toContainText("Passed");
   await expect(page.getByText('lookup_order {"order_number":"#1002"}')).toBeVisible();
   await expect(page.getByText("Order #1002: verified for this customer.")).toBeVisible();
+  await expect(page.getByText("All 6 checks pass")).toBeVisible();
 
   await reply(page).fill(`${await reply(page).inputValue()}\n\nThanks for your patience!`);
   await page.getByRole("button", { name: "Approve and send" }).click();
 
   await expect(page.getByTestId("ticket-status")).toHaveText("Sent");
   await expect(page.getByTestId("final-reply")).toContainText("Thanks for your patience!");
-  await expect(audit(page)).toContainText("Reply edited before approval");
-  await expect(audit(page)).toContainText("Reply approved");
-  await expect(audit(page)).toContainText("Saved to the outbox (not emailed)");
+  const audit = await activity(page);
+  await expect(audit).toContainText("Reply edited before approval");
+  await expect(audit).toContainText("Reply approved");
+  await expect(audit).toContainText("Saved to the outbox (not emailed)");
 
-  await page.getByRole("link", { name: "← Demo inbox" }).click();
-  await expect(page.getByRole("row").filter({ hasText: "When will my grinder arrive?" })).toContainText("Sent");
+  await expect(list(page).getByRole("link", { name: /When will my grinder arrive\?/ })).toContainText("Sent");
 });
 
 test("an edit that adds an amount the order data does not support blocks approval", async ({ page }) => {
@@ -40,6 +53,7 @@ test("an edit that adds an amount the order data does not support blocks approva
 
   await expect(check(page, "Amounts grounded")).toContainText("Blocks sending");
   await expect(check(page, "Amounts grounded")).toContainText("$500.00");
+  await expect(page.getByText("1 check blocks sending")).toBeVisible();
   await expect(page.getByRole("button", { name: "Approve and send" })).toBeDisabled();
 });
 
@@ -53,29 +67,33 @@ test("the agent does not share another customer's order", async ({ page }) => {
 
 test("a chargeback threat is flagged for a person, and a rejected draft can be drafted again", async ({ page }) => {
   await sample(page, "Chargeback threat");
-  await expect(page.getByText("Needs a person")).toBeVisible();
+  await expect(page.getByRole("main").getByText("Needs a person", { exact: true })).toBeVisible();
   await expect(check(page, "Escalation")).toContainText("chargeback");
 
-  await page.getByLabel(/Note for the agent/).fill("Too generic");
-  await page.getByRole("button", { name: "Reject" }).click();
+  await page.getByRole("button", { name: "Reject", exact: true }).click();
+  const reject = page.getByRole("dialog", { name: "Reject this draft?" });
+  await reject.getByLabel(/Reason/).fill("Too generic");
+  await reject.getByRole("button", { name: "Reject draft" }).click();
   await expect(page.getByTestId("ticket-status")).toHaveText("Rejected");
-  await expect(audit(page)).toContainText("Draft rejected: Too generic");
+  await expect(await activity(page)).toContainText("Draft rejected: Too generic");
 
-  await page.getByRole("button", { name: "Draft again" }).click();
+  await page.getByRole("button", { name: "Redraft" }).click();
+  await page.getByRole("dialog", { name: "Ask for a new draft" }).getByRole("button", { name: "Redraft" }).click();
   await expect(page.getByTestId("ticket-status")).toHaveText("Needs approval", { timeout: 60_000 });
-  await expect(page.getByRole("heading", { name: "Agent trace (run 2)" })).toBeVisible();
+  await page.getByRole("tab", { name: "Trace" }).click();
+  await expect(page.getByText("Run 2")).toBeVisible();
 });
 
 test("a rate-limited model call is retried, and the audit log shows it", async ({ page }) => {
-  await page.goto("/");
-  await page.getByText("Write your own").click();
-  await page.getByLabel("Subject").fill("Order status");
-  await page.getByLabel("Message").fill("[flaky] Where is order #1002?");
-  await page.getByRole("button", { name: "Send to the agent" }).click();
+  const dialog = await newEmail(page);
+  await dialog.getByRole("button", { name: "Write your own" }).click();
+  await dialog.getByLabel("Subject").fill("Order status");
+  await dialog.getByLabel("Message").fill("[flaky] Where is order #1002?");
+  await dialog.getByRole("button", { name: "Send to agent" }).click();
 
   await expect(page.getByTestId("ticket-status")).toHaveText("Needs approval", { timeout: 60_000 });
-  await expect(audit(page)).toContainText("Attempt 1 of the draft step failed: The model is rate limiting requests. Retrying in 5 s.");
-  await expect(page.getByTestId("ticket-cost")).toHaveText("$0.0000"); // the mock model has no price
+  await expect(await activity(page)).toContainText("Attempt 1 of the draft step failed: The model is rate limiting requests. Retrying in 5 s.");
+  await expect(page.getByTestId("ticket-cost")).toHaveText("$0"); // the mock model has no price
 });
 
 test("another browser cannot open a demo ticket", async ({ page, browser }) => {

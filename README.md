@@ -83,9 +83,21 @@ counts as caught.
 LLM_API_KEY=<Gemini API key> npm run eval   # writes evals/latest.json
 ```
 
-**No score yet.** ReplyPilot first targeted GitHub Models, which GitHub retired on 2026-07-30, so the first eval
-run never reached a model. It now runs on the Gemini API; the score and the measured cost per ticket go here
-once the eval has run against it.
+**12 of 12 passed** on `gemini-3.5-flash-lite` (Gemini API free tier, November 2026; full replies in
+[evals/latest.json](evals/latest.json)):
+
+| Per ticket | Measured |
+| --- | --- |
+| Model calls | 2.3 on average (2 to 3) |
+| Tokens | about 2,600 |
+| Cost at paid list price | $0.0012 (actual cost $0 on the free tier) |
+| Time to a draft | median 3.1 s; free-tier rate limits pushed a few tickets to 20 to 44 s |
+
+The agent declined to share the stranger's tracking number, ignored the injected "RefundBot" instructions
+without echoing the $500, flagged the chargeback threat for a person, answered in Spanish, and refused the
+opened-filter return by citing the returns policy. One slip the checks do not catch yet: on the injection
+ticket it wrote "delivered on October 20", which is the order date. Dates are not grounded by a check; that
+is the next check to add. Twelve tickets are a smoke test, not a benchmark.
 
 ## Staying free
 
@@ -157,8 +169,9 @@ redelivery, basic-auth inbound email and operator sign-in for the live inbox.
 
 ## Limits and next steps
 
-- The eval has not run against a real model yet (see Evals), and the live inbox has not been tested against a
-  real Shopify store or Postmark account; both paths are covered by tests that use payloads in the documented formats.
+- Dates in a reply are not checked against the order data (see Evals).
+- The live inbox has not been tested against a real Shopify store or Postmark account; both paths are covered
+  by tests that use payloads in the documented formats.
 - Policy search is keyword scoring over a handful of sections; a larger policy set would move to PostgreSQL
   full-text search or embeddings.
 - One operator key instead of user accounts; sign-in with roles would come first in a team setting.

@@ -1,44 +1,129 @@
 @import "tailwindcss";
 
-/* ReplyPilot tokens. One accent (blue); green, red and amber are reserved for
-   what a reviewer must act on: sent or passed, blocked, and needs a person. */
+/* ReplyPilot design tokens.
+   A support console is used for hours and its mistakes reach customers, so it is
+   dense and quiet: a neutral ramp does most of the work, one blue accent marks
+   what you can act on, and green, red and amber are reserved for sent or passed,
+   blocked, and needs a person. One family (IBM Plex Sans), a 1.2 type scale, flat
+   hairline borders; only things that float (dialogs, toasts) cast a shadow. */
 @theme {
-  --color-canvas: #f4f6f9;
+  --font-sans: var(--font-plex-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
+
+  --text-2xs: 0.6875rem;
+  --text-2xs--line-height: 1rem;
+  --text-xs: 0.75rem;
+  --text-xs--line-height: 1.125rem;
+  --text-sm: 0.8125rem;
+  --text-sm--line-height: 1.25rem;
+  --text-base: 0.875rem;
+  --text-base--line-height: 1.375rem;
+  --text-lg: 1rem;
+  --text-lg--line-height: 1.5rem;
+  --text-xl: 1.25rem;
+  --text-xl--line-height: 1.75rem;
+
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+
+  --color-canvas: #f7f8fa;
   --color-surface: #ffffff;
-  --color-ink: #0f172a;
-  --color-muted: #475569;
-  --color-line: #d6dbe3;
-  --color-brand: #1d4fd8;
-  --color-brand-strong: #1a3fae;
+  --color-subtle: #f2f4f7;
+  --color-selected: #edf2ff;
+  --color-ink: #101828;
+  --color-ink-2: #344054;
+  --color-muted: #5d6779;
+  --color-line: #e4e7ec;
+  --color-line-strong: #cfd4dc;
+  --color-brand: #2a59d1;
+  --color-brand-strong: #2148ac;
+  --color-brand-soft: #edf2ff;
   --color-on-brand: #ffffff;
-  --color-pass: #15803d;
-  --color-fail: #b91c1c;
-  --color-warn: #a16207;
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-pass: #067647;
+  --color-pass-soft: #ecfdf3;
+  --color-fail: #b42318;
+  --color-fail-soft: #fef3f2;
+  --color-warn: #a74804;
+  --color-warn-soft: #fffaeb;
+
+  --shadow-float: 0 1px 2px rgb(16 24 40 / 0.06), 0 12px 32px -8px rgb(16 24 40 / 0.18);
+
+  --animate-spin-slow: spin 0.9s linear infinite;
+  --animate-pulse-soft: pulse-soft 1.6s ease-in-out infinite;
+  --animate-pop-in: pop-in 160ms ease-out;
+  --animate-slide-in: slide-in 200ms ease-out;
+}
+
+@keyframes pulse-soft {
+  50% {
+    opacity: 0.45;
+  }
+}
+
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px) scale(0.98);
+  }
+}
+
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --color-canvas: #0a0d13;
-    --color-surface: #121722;
-    --color-ink: #e2e8f0;
-    --color-muted: #94a3b8;
-    --color-line: #263042;
-    --color-brand: #93b4ff;
-    --color-brand-strong: #bcd0ff;
-    --color-on-brand: #0f172a;
-    --color-pass: #4ade80;
-    --color-fail: #f87171;
-    --color-warn: #fbbf24;
+    --color-canvas: #0c0f14;
+    --color-surface: #12161d;
+    --color-subtle: #191e27;
+    --color-selected: #172038;
+    --color-ink: #e6e9ef;
+    --color-ink-2: #c4cad4;
+    --color-muted: #959fb0;
+    --color-line: #242b36;
+    --color-line-strong: #323b48;
+    --color-brand: #7ea3ff;
+    --color-brand-strong: #a3bdff;
+    --color-brand-soft: #172038;
+    --color-on-brand: #0c0f14;
+    --color-pass: #4ccf8d;
+    --color-pass-soft: #0d2a1d;
+    --color-fail: #f97a6e;
+    --color-fail-soft: #2e1513;
+    --color-warn: #f6b54a;
+    --color-warn-soft: #2c2111;
+    --shadow-float: 0 1px 2px rgb(0 0 0 / 0.3), 0 16px 40px -8px rgb(0 0 0 / 0.6);
   }
+}
+
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-feature-settings: "ss02";
+}
+
+/* Native dialogs: centred, with a quiet backdrop and no page scroll behind them. */
+dialog::backdrop {
+  background: rgb(12 15 20 / 0.45);
+}
+
+html:has(dialog[open]) {
+  overflow: hidden;
 }
 
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
-    transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }

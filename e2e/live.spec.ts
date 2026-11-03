@@ -44,21 +44,27 @@ test("signed webhooks open live tickets that only the operator can review and se
   await expect(page.getByRole("alert").filter({ hasText: /\w/ })).toHaveText("That key is not right.");
   await page.getByLabel("Operator key").fill(env.OPERATOR_KEY);
   await page.getByRole("button", { name: "Sign in" }).click();
-  await expect(page.getByRole("row").filter({ hasText: `Kettle question ${run}` })).toBeVisible();
+  await expect(page.getByRole("complementary", { name: "Live tickets" }).getByRole("link", { name: new RegExp(`Kettle question ${run}`) })).toBeVisible();
 
-  await page.goto(`/tickets/${id}`);
+  await page.goto(`/live/tickets/${id}`);
   await expect(page.getByText("Shopify event", { exact: true })).toBeVisible();
   await expect(page.getByTestId("ticket-status")).toHaveText("Needs approval", { timeout: 60_000 });
   await expect(page.getByRole("textbox", { name: "Reply" })).toHaveValue(/770000001006/);
   await page.getByRole("button", { name: "Approve and email" }).click();
+  await page.getByRole("dialog", { name: "Email this reply?" }).getByRole("button", { name: "Send email" }).click();
   await expect(page.getByTestId("ticket-status")).toHaveText("Sent");
+  await page.getByRole("tab", { name: "Activity" }).click();
   await expect(page.getByTestId("audit-log")).toContainText("Reply approved · operator");
+
+  await page.getByRole("button", { name: "Sign out" }).click();
+  await page.getByRole("dialog", { name: "Sign out of the live inbox?" }).getByRole("button", { name: "Sign out" }).click();
+  await expect(page.getByLabel("Operator key")).toBeVisible();
 });
 
 test("the live inbox stays closed without the operator key", async ({ page, request }) => {
   expect((await request.get("/api/tickets?view=live")).status()).toBe(401);
   const created = await request.post("/api/webhooks/shopify", shopifyEvent(`wh-closed-${run}`));
   const { id } = await created.json();
-  await page.goto(`/tickets/${id}`);
+  await page.goto(`/live/tickets/${id}`);
   await expect(page.getByText("Ticket not found.")).toBeVisible();
 });

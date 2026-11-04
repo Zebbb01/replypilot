@@ -10,6 +10,10 @@ append-only audit trail, and costed.
 
 The store is **Kettle & Pine**, a fictional coffee-gear shop; its customers and orders are made up.
 
+**Live demo: https://ca-replypilot-9z83ab.salmonriver-2ba7975b.southeastasia.azurecontainerapps.io**
+(no sign-up; send one of the sample emails). The app scales to zero when idle, so the first visit takes
+about 20 seconds to wake it, and a draft takes a few seconds more.
+
 ![The review screen: a reviewer added "$500" to a draft, the amounts check fails, and Approve is locked](docs/screenshots/review-blocked.png)
 
 ## What it does
@@ -103,7 +107,7 @@ is the next check to add. Twelve tickets are a smoke test, not a benchmark.
 
 | Service | Free allowance | How ReplyPilot stays inside it |
 | --- | --- | --- |
-| Container Apps (consumption) | 180,000 vCPU-seconds, 360,000 GiB-seconds and 2 million requests a month | Scales to zero; one replica of 0.5 vCPU and 1 GiB (web + worker) is about 100 awake hours a month |
+| Container Apps (consumption) | 180,000 vCPU-seconds, 360,000 GiB-seconds and 2 million requests a month | Scales to zero; one replica of 0.5 vCPU and 1 GiB (web + worker) is about 100 awake hours a month. A Free Trial allows one environment, so it joins the one LedgerLens created |
 | Azure Database for PostgreSQL Flexible Server | 750 hours of B1ms, 32 GB storage and 32 GB backups a month, for 12 months on a free account | One B1ms server, 32 GB, no storage auto-grow, no geo-redundant backups |
 | Log Analytics | 5 GB of ingestion a month | Daily cap of 0.1 GB |
 | Gemini API | Free tier, no billing; per-project rate limits shown in AI Studio | At most 40 drafts a day; demo limits per browser and per address |
